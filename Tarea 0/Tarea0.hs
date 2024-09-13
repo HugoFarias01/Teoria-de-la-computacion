@@ -1,9 +1,11 @@
+-- Tarea 0 - Hugo Farías (258218)
+
 import Tabla
 
 data E = Var X
        | Vacio
        | Uno Z
-       | Pert E E
+       | Pert Z E
        | Union E E
        | Inter E E
        | Difer E E
@@ -62,9 +64,18 @@ eval :: (M, E) -> (M, V)
 eval (m, Var x) = (m, lkup m x)
 eval (m, Vacio) = (m, Conjunto [])
 eval (m, Uno z) = (m, Conjunto [z])
+eval (m, Pert n1 e2) = let (m1, Conjunto v2) = eval (m, e2) in (m1, B (belongs n1 v2))
+eval (m, Union e1 e2) = let (m1, Conjunto v1) = eval (m, e1)
+                            (m2, Conjunto v2) = eval (m1, e2) in (m2, Conjunto (union v1 v2))
+eval (m, Inter e1 e2) = let (m1, Conjunto v1) = eval (m, e1) 
+                            (m2, Conjunto v2) = eval (m1, e2) in (m2, Conjunto (intersection v1 v2))
+eval (m, Difer e1 e2) = let (m1, Conjunto v1) = eval (m, e1)
+                            (m2, Conjunto v2) = eval (m1, e2) in (m2, Conjunto (difference v1 v2))
+eval (m, Incl e1 e2) = let (m1, Conjunto v1) = eval (m, e1)
+                           (m2, Conjunto v2) = eval (m1, e2) in (m2, B (included v1 v2))
+eval (m, Ass x e) = let (m1, v1) = eval (m, e) in (upd m1 (x, v1), v1)
 
-ejemploM :: M
-ejemploM = [("a", Conjunto [1, 2, 3]), ("b", Conjunto [4, 5]), ("c", B True), ("d", B False)]
+-- Expresiones
 
 conj1 :: E
 conj1 = Union (Uno 1) (Union (Uno 2) (Uno 3))
@@ -79,10 +90,10 @@ conj4 :: E
 conj4 = Inter conj1 conj2
 
 pert1 :: E
-pert1 = Pert (Uno 2) conj1
+pert1 = Pert 2 conj1
 
 pert2 :: E
-pert2 = Pert (Uno 3) conj4
+pert2 = Pert 3 conj4
 
 incl1 :: E
 incl1 = Incl conj1 conj2
@@ -104,3 +115,22 @@ ass3 = Ass "y" pert2
 
 ass4 :: E 
 ass4 = Ass "z" incl2
+
+-- Función auxiliar para ejecutar todas las pruebas
+ejecutarPruebas :: IO ()
+ejecutarPruebas = do
+    let memoriaInicial = [] :: M
+    -- Ejecutar cada una de las expresiones de prueba
+    print $ eval (memoriaInicial, conj1)
+    print $ eval (memoriaInicial, conj2)
+    print $ eval (memoriaInicial, conj3)
+    print $ eval (memoriaInicial, conj4)
+    print $ eval (memoriaInicial, pert1)
+    print $ eval (memoriaInicial, pert2)
+    print $ eval (memoriaInicial, incl1)
+    print $ eval (memoriaInicial, incl2)
+    print $ eval (memoriaInicial, incl3)
+    print $ eval (memoriaInicial, ass1)
+    print $ eval (memoriaInicial, ass2)
+    print $ eval (memoriaInicial, ass3)
+    print $ eval (memoriaInicial, ass4)
