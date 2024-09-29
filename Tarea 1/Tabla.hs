@@ -1,14 +1,14 @@
 -- insertar, eliminar , actualizar, recuperar, crear
-module Tabla(crear,lkup,upd,del) where
+module Tabla(crear,lkup,upd,del') where
 type Tabla a b = [(a,b)]
 
 crear :: Tabla a b
 crear = []
 
-lkup :: Eq a => Tabla a b -> a -> b
-lkup [] a = error "variable no definida"
+lkup :: Eq a => Tabla a b -> a -> Maybe b
+lkup [] a = Nothing
 lkup ((x,y):xys) a
- | x == a = y
+ | x == a = Just y
  | otherwise = lkup xys a
  
 upd :: Eq a => Tabla a b -> (a,b) -> Tabla a b
