@@ -34,11 +34,11 @@ eliminarUltimo (x:[]) = []
 eliminarUltimo (x:xs) = x:eliminarUltimo xs
 
 left :: Cinta -> Cinta
-left ([], c, r) = error "Fuera de la cinta"
+left ([], c, r) = (["#"], "#", c:r)
 left (l, c, r) = ((eliminarUltimo l), (ultimo l), c:r)
 
 right :: Cinta -> Cinta
-right (l, c, []) = error "Fuera de la cinta"
+right (l, c, []) = (l ++ ["#"], "#", [])
 right (l, c, (r:rs)) = (l ++ [c], r, rs) 
 
 write :: Simbolo -> Cinta -> Cinta
@@ -99,12 +99,13 @@ lSigma = [
         ]),
         ("loop", [
             (sigma, (W sigma, "h")),
+            ("#", (W "#", "h")), -- En caso de no encontraron el simbolo sigma
             ("_", (L, "loop"))
         ])
     ]
 
 cintaInicial :: Cinta
-cintaInicial = (["#", sigma, "a", "a", "c"], "#", ["c", "d", "c", "#"])
+cintaInicial = (["a", "a", "c"], "#", ["c", "d", "c", "#"])
 
 ejecutarLSigma = ejecucion lSigma cintaInicial -- Para ejecutar LSigma
 
@@ -113,15 +114,14 @@ ejecutarLSigma = ejecucion lSigma cintaInicial -- Para ejecutar LSigma
 ---------
 
 {- Precondicion: Partimos de un simbolo # como current. A la izquierda se encuentra la tira de I para la cual
-queremos saber si es par o impar. A la derecha se encuentran dos # que indican el final de la cinta, en el
-primero de ellos se devuelve el resultado "T" si es par y "F" si es impar.
+queremos saber si es par o impar. A la derecha se encuentran el resiultado, T si es par y F si es impar.
 
 Ejemplo 
-Cinta inicial: (#, I, I, I, I, I, #, #, #)
+Cinta inicial: (#, I, I, I, I, I, #)
                                   ^                        
                                current
 
-Cinta final: (#, I, I, I, I, I, I, #, T, #)
+Cinta final: (#, I, I, I, I, I, I, #, T)
                                    ^  
                                 current
 -}
@@ -162,7 +162,7 @@ par = [
     ]
 
 cintaPar :: Cinta
-cintaPar = (["#", "I", "I", "I", "I", "I"], "#", ["#", "#"])
+cintaPar = (["I", "I", "I", "I"], "#", [])
 
 ejecutarPar = ejecucion par cintaPar -- Para ejecutar Par
 
@@ -171,19 +171,18 @@ ejecutarPar = ejecucion par cintaPar -- Para ejecutar Par
 ----------
 
 {- Precondicion: Partimos de un simbolo # como current. A la izquierda se encuentra la tira donde buscamos
-el simbolo sigma. A la derecha se encuentran dos # que indican el final de la cinta, en el primero de ellos
-se devuelve el resultado.
+el simbolo sigma. A la derecha se encuentra el resultado, T si el simbolo sigma se encuentra en la tira y F
+si no se encuentra.
 
 Ejemplo 
-Cinta inicial: (#, I, I, I, I, I, #, #, #)
-                                  ^                        
-                               current
+Cinta inicial: (#, "a", "Sigma", "a", "a", #)
+                                           ^                        
+                                        current
 
-Cinta final: (#, I, I, I, I, I, I, #, T, #)
-                                   ^  
-                                current
+Cinta final: (#, "a", "Sigma", "a", "a", #, T)
+                                         ^  
+                                       current
 -}
-
 
 sigmaElem :: Simbolo
 sigmaElem = "Sigma"
@@ -218,7 +217,7 @@ elemMT = [
     ]
 
 cintaElem :: Cinta
-cintaElem = (["#", "a", sigma, "a", "a"], "#", ["#", "#"])
+cintaElem = (["#", "a", sigma, "a", "a"], "#", [])
 
 ejecutarElem = ejecucion elemMT cintaElem -- Para ejecutar Elem
 
@@ -231,9 +230,9 @@ encuentran la mismca cantidad # que el largo de nuestra tira. En cada uno de los
 simbolo correspondiente de la tira en orden inverso.
 
 Ejemplo 
-Cinta inicial: (#, a, b, a, a, #, #, #, #, #, #)
-                                  ^                        
-                               current
+Cinta inicial: (#, a, b, a, a, #)
+                               ^                        
+                            current
 
 Cinta final: (#, a, b, a, a, #, a, a, b, a, #)
                              ^  
@@ -265,18 +264,24 @@ reverseMT = [
                 ("_", (R, "vuelvoCentroDerechaS2"))    
             ]),
             ("finDerechaS1", [
-                ("#", (W sigma1, "graboSigma1")),
+                ("#", (R, "vuelvoUnoSigma1")),
                 ("_", (R, "finDerechaS1"))
             ]),
             ("finDerechaS2", [
-                ("#", (W sigma2, "graboSigma2")),
+                ("#", (R, "vuelvoUnoSigma2")),
                 ("_", (R, "finDerechaS2"))
             ]),
+            ("vuelvoUnoSigma1", [
+                ("#", (L, "graboSigma1"))
+            ]),
+            ("vuelvoUnoSigma2", [
+                ("#", (L, "graboSigma2"))
+            ]),
             ("graboSigma1", [
-                (sigma1, (W sigma1, "vuelvoCentroIzqS1")) 
+                ("#", (W sigma1, "vuelvoCentroIzqS1")) 
             ]),
             ("graboSigma2", [
-                (sigma2, (W sigma2, "vuelvoCentroIzqS2")) 
+                ("#", (W sigma2, "vuelvoCentroIzqS2")) 
             ]),
             ("vuelvoCentroIzqS1", [
                 ("#", (R, "busco@S1")),
@@ -312,6 +317,6 @@ reverseMT = [
         ]
 
 cintaReverse :: Cinta
-cintaReverse = (["#", sigma1, sigma2, sigma1, sigma1],"#",["#","#","#", "#", "#"])
+cintaReverse = (["#", sigma1, sigma2, sigma1, sigma1],"#",[])
 
 ejecutarReverse = ejecucion reverseMT cintaReverse
