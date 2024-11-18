@@ -57,20 +57,11 @@ buscarRama s ((s', (a, e)):rs)
     | s == s' = (a, e)
     | otherwise = buscarRama s rs
 
--- step :: Estado -> Codigo -> Cinta -> (Cinta, Estado)
--- step e codigo (l, c, r) = case buscarRama c (dameRamas e codigo) of
---     (L, e') -> ((left (l, c, r)), e')
---     (R, e') -> ((right (l, c, r)), e')
---     (W s, e') -> ((write s (l, c, r)), e')
-
 step :: Estado -> Codigo -> Cinta -> (Cinta, Estado)
-step e codigo (l, c, r) = 
-    let (accion, estado') = buscarRama c (dameRamas e codigo) in
-    case accion of
-        L -> trace ("Acción: L | Estado: " ++ e ++ " | Símbolo actual: " ++ c) ((left (l, c, r)), estado')
-        R -> trace ("Acción: R | Estado: " ++ e ++ " | Símbolo actual: " ++ c) ((right (l, c, r)), estado')
-        W s -> trace ("Acción: W " ++ s ++ " | Estado: " ++ e ++ " | Símbolo actual: " ++ c) ((write s (l, c, r)), estado')
-
+step e codigo (l, c, r) = case buscarRama c (dameRamas e codigo) of
+    (L, e') -> ((left (l, c, r)), e')
+    (R, e') -> ((right (l, c, r)), e')
+    (W s, e') -> ((write s (l, c, r)), e')
 
 iteracion :: Estado -> Codigo -> Cinta -> (Cinta, Estado)
 iteracion e codigo cinta = case e of 
@@ -105,7 +96,7 @@ lSigma = [
     ]
 
 cintaInicial :: Cinta
-cintaInicial = (["a", "a", "c"], "#", ["c", "d", "c", "#"])
+cintaInicial = (["a", sigma, "a", "c"], "#", ["c", "d", "c", "#"])
 
 ejecutarLSigma = ejecucion lSigma cintaInicial -- Para ejecutar LSigma
 
@@ -117,13 +108,13 @@ ejecutarLSigma = ejecucion lSigma cintaInicial -- Para ejecutar LSigma
 queremos saber si es par o impar. A la derecha se encuentran el resiultado, T si es par y F si es impar.
 
 Ejemplo 
-Cinta inicial: (#, I, I, I, I, I, #)
-                                  ^                        
-                               current
+Cinta inicial: (I, I, I, I, #)
+                            ^                        
+                         current
 
-Cinta final: (#, I, I, I, I, I, I, #, T)
-                                   ^  
-                                current
+Cinta final: (I, I, I, I, #, T)
+                          ^  
+                        current
 -}
 
 par :: Codigo
@@ -175,13 +166,13 @@ el simbolo sigma. A la derecha se encuentra el resultado, T si el simbolo sigma 
 si no se encuentra.
 
 Ejemplo 
-Cinta inicial: (#, "a", "Sigma", "a", "a", #)
-                                           ^                        
-                                        current
+Cinta inicial: ("a", "Sigma", "a", "a", #)
+                                        ^                        
+                                      current
 
-Cinta final: (#, "a", "Sigma", "a", "a", #, T)
-                                         ^  
-                                       current
+Cinta final: ("a", "Sigma", "a", "a", #, T)
+                                      ^  
+                                    current
 -}
 
 sigmaElem :: Simbolo
@@ -217,7 +208,7 @@ elemMT = [
     ]
 
 cintaElem :: Cinta
-cintaElem = (["#", "a", sigma, "a", "a"], "#", [])
+cintaElem = (["a", sigma, "a", "a"], "#", [])
 
 ejecutarElem = ejecucion elemMT cintaElem -- Para ejecutar Elem
 
@@ -225,18 +216,17 @@ ejecutarElem = ejecucion elemMT cintaElem -- Para ejecutar Elem
 -- Reverse --
 -------------
 
-{- Precondicion: Partimos de un simbolo # como current. A la izquierda se encuentra la tira. A la derecha se
-encuentran la mismca cantidad # que el largo de nuestra tira. En cada uno de los # se va a ir escribiendo el
-simbolo correspondiente de la tira en orden inverso.
+{- Precondicion: Partimos de un simbolo # como current. A la izquierda se encuentra la tira. A la derecha
+se encuentra la tira donde se guardara la tira original invertida.
 
 Ejemplo 
-Cinta inicial: (#, a, b, a, a, #)
-                               ^                        
-                            current
+Cinta inicial: (a, b, a, a, #)
+                            ^                        
+                          current
 
-Cinta final: (#, a, b, a, a, #, a, a, b, a, #)
-                             ^  
-                           current
+Cinta final: (a, b, a, a, #, a, a, b, a, #)
+                          ^  
+                        current
 -}
 
 sigma1 :: Simbolo
@@ -317,6 +307,6 @@ reverseMT = [
         ]
 
 cintaReverse :: Cinta
-cintaReverse = (["#", sigma1, sigma2, sigma1, sigma1],"#",[])
+cintaReverse = ([sigma1, sigma2, sigma1, sigma1],"#",[])
 
 ejecutarReverse = ejecucion reverseMT cintaReverse
